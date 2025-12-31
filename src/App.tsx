@@ -8,6 +8,7 @@ import Dashboard from "./pages/Dashboard";
 import Clients from "./pages/Clients";
 import Calendar from "./pages/Calendar";
 import Settings from "./pages/Settings";
+import Reports from "./pages/Reports";
 import BookAppointment from "./pages/BookAppointment";
 import ClientDetails from "./pages/ClientDetails";
 import AppointmentDetails from "./pages/AppointmentDetails";
@@ -31,6 +32,7 @@ const App = () => (
                 <Route path="/clients" element={<Clients />} />
                 <Route path="/clients/:clientId" element={<ClientDetails />} />
                 <Route path="/calendar" element={<Calendar />} />
+                <Route path="/reports" element={<Reports />} />
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/book-appointment" element={<BookAppointment />} />
                 <Route path="/appointments/:appointmentId" element={<AppointmentDetails />} />

@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { CheckCircle, XCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import AppointmentFilter from "@/components/AppointmentFilter";
+import DataExport from "@/components/DataExport";
 
 const Calendar = () => {
   const { appointments, updateAppointmentStatus } = useAppointmentContext();
@@ -58,9 +59,29 @@ const Calendar = () => {
     setFilters(newFilters);
   };
 
+  // Prepare data for export
+  const exportData = filteredAppointments.map(app => ({
+    id: app.id,
+    date: format(app.date, "yyyy-MM-dd HH:mm"),
+    patientName: app.patient.fullName,
+    patientEmail: app.patient.email,
+    service: app.service.name,
+    price: app.service.price,
+    status: app.status,
+    paymentReference: app.paymentReference || ""
+  }));
+
   return (
     <div className="p-4 sm:p-6 lg:p-8">
-      <h1 className="text-3xl font-bold mb-6">Calendar</h1>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+        <h1 className="text-3xl font-bold">Calendar</h1>
+        <DataExport 
+          data={exportData} 
+          filename="appointments-export" 
+          title="Export Appointments" 
+        />
+      </div>
+      
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>

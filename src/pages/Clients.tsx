@@ -9,6 +9,7 @@ import ClientForm, { ClientFormValues } from "@/components/ClientForm";
 import { Link } from "react-router-dom";
 import { useClientContext } from "@/context/ClientContext";
 import ClientSearch from "@/components/ClientSearch";
+import DataExport from "@/components/DataExport";
 
 const Clients = () => {
   const { clients, addClient } = useClientContext();
@@ -26,23 +27,40 @@ const Clients = () => {
     client.phone.includes(searchQuery)
   );
 
+  // Prepare data for export (remove functions, keep only data)
+  const exportData = filteredClients.map(client => ({
+    id: client.id,
+    fullName: client.fullName,
+    email: client.email,
+    phone: client.phone,
+    address: client.address || "",
+    notes: client.notes || ""
+  }));
+
   return (
     <div className="p-4 sm:p-6 lg:p-8">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <h1 className="text-3xl font-bold">Clients</h1>
         <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
           <ClientSearch onSearch={setSearchQuery} />
-          <Dialog open={isAddClientDialogOpen} onOpenChange={setIsAddClientDialogOpen}>
-            <DialogTrigger asChild>
-              <Button>Add New Client</Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-              <DialogHeader>
-                <DialogTitle>Add New Client</DialogTitle>
-              </DialogHeader>
-              <ClientForm onSubmit={handleAddClient} onCancel={() => setIsAddClientDialogOpen(false)} />
-            </DialogContent>
-          </Dialog>
+          <div className="flex gap-2">
+            <DataExport 
+              data={exportData} 
+              filename="clients-export" 
+              title="Export Clients" 
+            />
+            <Dialog open={isAddClientDialogOpen} onOpenChange={setIsAddClientDialogOpen}>
+              <DialogTrigger asChild>
+                <Button>Add New Client</Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Add New Client</DialogTitle>
+                </DialogHeader>
+                <ClientForm onSubmit={handleAddClient} onCancel={() => setIsAddClientDialogOpen(false)} />
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
       </div>
       

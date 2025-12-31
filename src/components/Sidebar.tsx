@@ -2,33 +2,18 @@
 
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Home, Users, Calendar, Settings } from "lucide-react";
+import { Home, Users, Calendar, BarChart, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const navItems = [
-  {
-    name: "Dashboard",
-    icon: Home,
-    path: "/",
-  },
-  {
-    name: "Clients",
-    icon: Users,
-    path: "/clients",
-  },
-  {
-    name: "Calendar",
-    icon: Calendar,
-    path: "/calendar",
-  },
-  {
-    name: "Settings",
-    icon: Settings,
-    path: "/settings",
-  },
+  { name: "Dashboard", icon: Home, path: "/" },
+  { name: "Clients", icon: Users, path: "/clients" },
+  { name: "Calendar", icon: Calendar, path: "/calendar" },
+  { name: "Reports", icon: BarChart, path: "/reports" },
+  { name: "Settings", icon: Settings, path: "/settings" },
 ];
 
 const Sidebar = () => {
@@ -44,7 +29,7 @@ const Sidebar = () => {
               variant="ghost"
               className={cn(
                 "w-full flex flex-col items-center justify-center h-auto py-1 px-0 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                location.pathname === item.path && "bg-sidebar-accent text-sidebar-accent-foreground",
+                location.pathname === item.path && "bg-sidebar-accent text-sidebar-accent-foreground"
               )}
             >
               <item.icon className="h-5 w-5 mb-1" />
@@ -66,7 +51,7 @@ const Sidebar = () => {
                 to={item.path}
                 className={cn(
                   "flex h-9 w-9 items-center justify-center rounded-lg text-sidebar-foreground transition-colors hover:text-sidebar-accent-foreground md:h-8 md:w-8",
-                  location.pathname === item.path && "bg-sidebar-accent text-sidebar-accent-foreground",
+                  location.pathname === item.path && "bg-sidebar-accent text-sidebar-accent-foreground"
                 )}
               >
                 <item.icon className="h-5 w-5" />
