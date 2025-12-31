@@ -1,13 +1,13 @@
 "use client";
 
 import React, { useState } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom"; // Import useNavigate
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Edit, Trash2 } from "lucide-react"; // Import Trash2 icon
+import { ArrowLeft, Edit, Trash2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import {
-  AlertDialog, // Import AlertDialog components
+  AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
@@ -17,13 +17,25 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
 import ClientForm, { ClientFormValues } from "@/components/ClientForm";
 import { useClientContext } from "@/context/ClientContext";
+import { useAppointmentContext } from "@/context/AppointmentContext"; // Import useAppointmentContext
+import { format } from "date-fns";
 
 const ClientDetails = () => {
   const { clientId } = useParams<{ clientId: string }>();
-  const { clients, updateClient, deleteClient } = useClientContext(); // Use deleteClient from context
-  const navigate = useNavigate(); // Initialize useNavigate
+  const { clients, updateClient, deleteClient } = useClientContext();
+  const { appointments } = useAppointmentContext(); // Get appointments from context
+  const navigate = useNavigate();
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   const client = clients.find((c) => c.id === clientId);
@@ -38,7 +50,24 @@ const ClientDetails = () => {
   const handleDeleteClient = () => {
     if (clientId) {
       deleteClient(clientId);
-      navigate("/clients"); // Redirect to clients list after deletion
+      navigate("/clients");
+    }
+  };
+
+  const clientAppointments = appointments.filter(
+    (app) => app.patient.email === client?.email
+  ).sort((a, b) => b.date.getTime() - a.date.getTime()); // Sort by most recent first
+
+  const getStatusVariant = (status: string) => {
+    switch (status) {
+      case "booked":
+        return "default";
+      case "completed":
+        return "secondary";
+      case "cancelled":
+        return "destructive";
+      default:
+        return "outline";
     }
   };
 
@@ -112,7 +141,7 @@ const ClientDetails = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         <Card>
           <CardHeader>
             <CardTitle>Contact Information</CardTitle>
@@ -134,7 +163,41 @@ const ClientDetails = () => {
         </Card>
       </div>
 
-      {/* Future sections like Appointments, Medical History can go here */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Client Appointments</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {clientAppointments.length === 0 ? (
+            <p className="text-muted-foreground text-center py-4">No appointments found for this client.</p>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Service</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Price</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {clientAppointments.map((app) => (
+                    <TableRow key={app.id}>
+                      <TableCell className="font-medium">{format(app.date, "PPP 'at' p")}</TableCell>
+                      <TableCell>{app.service.name}</TableCell>
+                      <TableCell>
+                        <Badge variant={getStatusVariant(app.status)}>{app.status}</Badge>
+                      </TableCell>
+                      <TableCell className="text-right">${app.service.price.toFixed(2)}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 };
