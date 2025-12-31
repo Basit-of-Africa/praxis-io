@@ -137,13 +137,20 @@ const BookAppointment = () => {
       {step === 4 && selectedService && selectedDate && patientDetails && (
         <div className="mb-8">
           <h2 className="text-2xl font-semibold mb-4">4. Make Payment</h2>
-          <PaystackPayment
-            amount={amountInKobo}
-            email={patientDetails.email}
-            fullName={patientDetails.fullName}
-            onSuccess={handlePaymentSuccess}
-            onClose={handlePaymentClose}
-          />
+          {import.meta.env.VITE_PAYSTACK_PUBLIC_KEY ? (
+            <PaystackPayment
+              amount={amountInKobo}
+              email={patientDetails.email}
+              fullName={patientDetails.fullName}
+              onSuccess={handlePaymentSuccess}
+              onClose={handlePaymentClose}
+            />
+          ) : (
+            <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-md" role="alert">
+              <p className="font-bold">Paystack Public Key Missing</p>
+              <p>Please set your <code>VITE_PAYSTACK_PUBLIC_KEY</code> environment variable to enable payments.</p>
+            </div>
+          )}
           <div className="flex justify-start mt-6">
             <Button variant="outline" onClick={handleBack}>
               Back to Details
