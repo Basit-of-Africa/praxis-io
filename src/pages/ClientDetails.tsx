@@ -4,27 +4,10 @@ import React, { useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Edit, Trash2 } from "lucide-react";
+import { ArrowLeft, Edit, Trash2, Phone, Mail, MapPin, Calendar } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import ClientForm, { ClientFormValues } from "@/components/ClientForm";
 import { useClientContext } from "@/context/ClientContext";
@@ -55,9 +38,9 @@ const ClientDetails = () => {
   };
 
   // Filter appointments by client email, as client ID is not directly stored on appointment patient object
-  const clientAppointments = appointments.filter(
-    (app) => app.patient.email === client?.email
-  ).sort((a, b) => b.date.getTime() - a.date.getTime()); // Sort by most recent first
+  const clientAppointments = appointments
+    .filter((app) => app.patient.email === client?.email)
+    .sort((a, b) => b.date.getTime() - a.date.getTime()); // Sort by most recent first
 
   const getStatusVariant = (status: string) => {
     switch (status) {
@@ -109,14 +92,9 @@ const ClientDetails = () => {
               <DialogHeader>
                 <DialogTitle>Edit Client Details</DialogTitle>
               </DialogHeader>
-              <ClientForm
-                onSubmit={handleEditClient}
-                onCancel={() => setIsEditDialogOpen(false)}
-                defaultValues={client}
-              />
+              <ClientForm onSubmit={handleEditClient} onCancel={() => setIsEditDialogOpen(false)} defaultValues={client} />
             </DialogContent>
           </Dialog>
-
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button variant="destructive" size="sm">
@@ -127,8 +105,7 @@ const ClientDetails = () => {
               <AlertDialogHeader>
                 <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This action cannot be undone. This will permanently delete {client.fullName}'s record
-                  and remove their data from our servers.
+                  This action cannot be undone. This will permanently delete {client.fullName}'s record and remove their data from our servers.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
@@ -142,31 +119,86 @@ const ClientDetails = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        <Card>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        <Card className="md:col-span-2">
           <CardHeader>
             <CardTitle>Contact Information</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2">
-            <p><strong>Email:</strong> {client.email}</p>
-            <p><strong>Phone:</strong> {client.phone}</p>
-            <p><strong>Address:</strong> {client.address || "N/A"}</p>
+          <CardContent className="space-y-4">
+            <div className="flex items-start">
+              <Mail className="h-5 w-5 text-muted-foreground mr-3 mt-0.5" />
+              <div>
+                <p className="text-sm text-muted-foreground">Email</p>
+                <p className="font-medium">{client.email}</p>
+              </div>
+            </div>
+            <div className="flex items-start">
+              <Phone className="h-5 w-5 text-muted-foreground mr-3 mt-0.5" />
+              <div>
+                <p className="text-sm text-muted-foreground">Phone</p>
+                <p className="font-medium">{client.phone}</p>
+              </div>
+            </div>
+            <div className="flex items-start">
+              <MapPin className="h-5 w-5 text-muted-foreground mr-3 mt-0.5" />
+              <div>
+                <p className="text-sm text-muted-foreground">Address</p>
+                <p className="font-medium">{client.address || "N/A"}</p>
+              </div>
+            </div>
           </CardContent>
         </Card>
-
+        
         <Card>
           <CardHeader>
-            <CardTitle>Notes</CardTitle>
+            <CardTitle>Client Statistics</CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground">{client.notes || "No additional notes."}</p>
+          <CardContent className="space-y-3">
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Total Appointments</span>
+              <span className="font-medium">{clientAppointments.length}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Completed</span>
+              <span className="font-medium">
+                {clientAppointments.filter(app => app.status === "completed").length}
+              </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Upcoming</span>
+              <span className="font-medium">
+                {clientAppointments.filter(app => app.status === "booked").length}
+              </span>
+            </div>
+            <div className="pt-2">
+              <Link to="/book-appointment" className="text-primary hover:underline text-sm">
+                Book New Appointment
+              </Link>
+            </div>
           </CardContent>
         </Card>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Client Appointments</CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-0">
+            <CardTitle>Notes</CardTitle>
+          </CardHeader>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground">{client.notes || "No additional notes."}</p>
+        </CardContent>
+      </Card>
+
+      <Card className="mt-6">
+        <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-0">
+            <CardTitle>Client Appointments</CardTitle>
+            <div className="flex items-center text-sm text-muted-foreground">
+              <Calendar className="h-4 w-4 mr-1" />
+              {clientAppointments.length} appointments
+            </div>
+          </CardHeader>
         </CardHeader>
         <CardContent>
           {clientAppointments.length === 0 ? (
@@ -184,7 +216,11 @@ const ClientDetails = () => {
                 </TableHeader>
                 <TableBody>
                   {clientAppointments.map((app) => (
-                    <TableRow key={app.id} className="cursor-pointer hover:bg-muted/50" onClick={() => navigate(`/appointments/${app.id}`)}>
+                    <TableRow 
+                      key={app.id} 
+                      className="cursor-pointer hover:bg-muted/50" 
+                      onClick={() => navigate(`/appointments/${app.id}`)}
+                    >
                       <TableCell className="font-medium">{format(app.date, "PPP 'at' p")}</TableCell>
                       <TableCell>{app.service.name}</TableCell>
                       <TableCell>

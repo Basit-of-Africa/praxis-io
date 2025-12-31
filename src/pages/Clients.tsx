@@ -3,52 +3,58 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import ClientForm, { ClientFormValues } from "@/components/ClientForm";
 import { Link } from "react-router-dom";
-import { useClientContext } from "@/context/ClientContext"; // Import useClientContext
+import { useClientContext } from "@/context/ClientContext";
+import ClientSearch from "@/components/ClientSearch";
 
 const Clients = () => {
-  const { clients, addClient } = useClientContext(); // Use clients and addClient from context
+  const { clients, addClient } = useClientContext();
   const [isAddClientDialogOpen, setIsAddClientDialogOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const handleAddClient = (data: ClientFormValues) => {
-    addClient(data); // Use the addClient function from context
+    addClient(data);
     setIsAddClientDialogOpen(false);
   };
 
+  const filteredClients = clients.filter(client => 
+    client.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    client.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    client.phone.includes(searchQuery)
+  );
+
   return (
     <div className="p-4 sm:p-6 lg:p-8">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <h1 className="text-3xl font-bold">Clients</h1>
-        <Dialog open={isAddClientDialogOpen} onOpenChange={setIsAddClientDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>Add New Client</Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Add New Client</DialogTitle>
-            </DialogHeader>
-            <ClientForm onSubmit={handleAddClient} onCancel={() => setIsAddClientDialogOpen(false)} />
-          </DialogContent>
-        </Dialog>
+        <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+          <ClientSearch onSearch={setSearchQuery} />
+          <Dialog open={isAddClientDialogOpen} onOpenChange={setIsAddClientDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>Add New Client</Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>Add New Client</DialogTitle>
+              </DialogHeader>
+              <ClientForm onSubmit={handleAddClient} onCancel={() => setIsAddClientDialogOpen(false)} />
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
-
+      
       <Card>
         <CardHeader>
           <CardTitle>Your Clients</CardTitle>
         </CardHeader>
         <CardContent>
-          {clients.length === 0 ? (
-            <p className="text-muted-foreground text-center py-4">No clients found. Add your first client!</p>
+          {filteredClients.length === 0 ? (
+            <p className="text-muted-foreground text-center py-4">
+              {searchQuery ? "No clients match your search." : "No clients found. Add your first client!"}
+            </p>
           ) : (
             <div className="overflow-x-auto">
               <Table>
@@ -62,7 +68,7 @@ const Clients = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {clients.map((client) => (
+                  {filteredClients.map((client) => (
                     <TableRow key={client.id}>
                       <TableCell className="font-medium">
                         <Link to={`/clients/${client.id}`} className="text-primary hover:underline">

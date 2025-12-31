@@ -4,7 +4,7 @@ import React from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, CheckCircle, XCircle } from "lucide-react";
+import { ArrowLeft, CheckCircle, XCircle, Calendar as CalendarIcon, User, CreditCard, FileText } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useAppointmentContext } from "@/context/AppointmentContext";
 import { format } from "date-fns";
@@ -67,17 +67,17 @@ const AppointmentDetails = () => {
         </div>
         {appointment.status === "booked" && (
           <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
+            <Button 
+              variant="outline" 
+              size="sm" 
               onClick={() => handleUpdateStatus("completed")}
               className="text-green-600 hover:text-green-700 border-green-600 hover:bg-green-50"
             >
               <CheckCircle className="h-4 w-4 mr-1" /> Mark as Complete
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
+            <Button 
+              variant="outline" 
+              size="sm" 
               onClick={() => handleUpdateStatus("cancelled")}
               className="text-red-600 hover:text-red-700 border-red-600 hover:bg-red-50"
             >
@@ -87,34 +87,69 @@ const AppointmentDetails = () => {
         )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        <Card>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle>Appointment Information</CardTitle>
+            <CardTitle className="flex items-center">
+              <CalendarIcon className="mr-2 h-5 w-5" />
+              Appointment Information
+            </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2">
-            <p><strong>Service:</strong> {appointment.service.name}</p>
-            <p><strong>Date:</strong> {format(appointment.date, "PPP")}</p>
-            <p><strong>Time:</strong> {format(appointment.date, "p")}</p>
-            <p><strong>Price:</strong> ${appointment.service.price.toFixed(2)}</p>
-            <p className="flex items-center">
-              <strong>Status:</strong> <Badge variant={getStatusVariant(appointment.status)} className="ml-2">{appointment.status}</Badge>
-            </p>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <p className="text-sm text-muted-foreground">Service</p>
+                <p className="font-medium">{appointment.service.name}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Date & Time</p>
+                <p className="font-medium">{format(appointment.date, "PPP 'at' p")}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Price</p>
+                <p className="font-medium">${appointment.service.price.toFixed(2)}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Status</p>
+                <Badge variant={getStatusVariant(appointment.status)} className="mt-1">
+                  {appointment.status}
+                </Badge>
+              </div>
+            </div>
+            
             {appointment.paymentReference && (
-              <p><strong>Payment Ref:</strong> {appointment.paymentReference}</p>
+              <div>
+                <p className="text-sm text-muted-foreground">Payment Reference</p>
+                <p className="font-medium">{appointment.paymentReference}</p>
+              </div>
             )}
           </CardContent>
         </Card>
-
+        
         <Card>
           <CardHeader>
-            <CardTitle>Patient Information</CardTitle>
+            <CardTitle className="flex items-center">
+              <User className="mr-2 h-5 w-5" />
+              Patient Information
+            </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2">
-            <p><strong>Full Name:</strong> {appointment.patient.fullName}</p>
-            <p><strong>Email:</strong> {appointment.patient.email}</p>
-            <p><strong>Phone:</strong> {appointment.patient.phone}</p>
-            <p><strong>Notes:</strong> {appointment.patient.notes || "N/A"}</p>
+          <CardContent className="space-y-4">
+            <div>
+              <p className="text-sm text-muted-foreground">Full Name</p>
+              <p className="font-medium">{appointment.patient.fullName}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Email</p>
+              <p className="font-medium">{appointment.patient.email}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Phone</p>
+              <p className="font-medium">{appointment.patient.phone}</p>
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Notes</p>
+              <p className="font-medium">{appointment.patient.notes || "N/A"}</p>
+            </div>
             <Link to={`/clients/${appointment.patient.email}`} className="text-primary hover:underline text-sm mt-2 block">
               View Client Profile
             </Link>
@@ -124,12 +159,42 @@ const AppointmentDetails = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>Service Description</CardTitle>
+          <CardTitle className="flex items-center">
+            <FileText className="mr-2 h-5 w-5" />
+            Service Description
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground">{appointment.service.description}</p>
         </CardContent>
       </Card>
+      
+      {appointment.status === "completed" && (
+        <Card className="mt-6">
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <CreditCard className="mr-2 h-5 w-5" />
+              Payment Information
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <p className="text-sm text-muted-foreground">Amount Paid</p>
+                <p className="font-medium">${appointment.service.price.toFixed(2)}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Payment Method</p>
+                <p className="font-medium">Credit Card</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Payment Date</p>
+                <p className="font-medium">{format(appointment.date, "PPP")}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };
