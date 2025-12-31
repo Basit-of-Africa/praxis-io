@@ -3,7 +3,8 @@
 import React, { useState } from "react";
 import ServiceSelection from "@/components/ServiceSelection";
 import AppointmentDatePicker from "@/components/AppointmentDatePicker";
-import BookingForm from "@/components/BookingForm"; // Import the new BookingForm
+import BookingForm from "@/components/BookingForm";
+import PaystackPayment from "@/components/PaystackPayment"; // Import the new PaystackPayment component
 import { Button } from "@/components/ui/button";
 import { showSuccess, showError } from "@/utils/toast";
 import { format } from "date-fns";
@@ -30,7 +31,7 @@ const BookAppointment = () => {
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [patientDetails, setPatientDetails] = useState<BookingDetails['patient'] | null>(null);
-  const [step, setStep] = useState(1); // 1: Service, 2: Date, 3: Form
+  const [step, setStep] = useState(1); // 1: Service, 2: Date, 3: Form, 4: Payment
 
   const handleServiceSelect = (service: Service | null) => {
     setSelectedService(service);
@@ -49,15 +50,24 @@ const BookAppointment = () => {
       setStep(1); // Reset to start
       return;
     }
+    setStep(4); // Move to payment step
+  };
+
+  const handlePaymentSuccess = (reference: string) => {
+    if (!selectedService || !selectedDate || !patientDetails) {
+      showError("An unexpected error occurred after payment. Please check your booking history.");
+      setStep(1); // Reset to start
+      return;
+    }
 
     const finalBooking: BookingDetails = {
       service: selectedService,
       date: selectedDate,
-      patient: data,
+      patient: patientDetails,
     };
 
-    console.log("Final Booking Details:", finalBooking);
-    showSuccess(`Appointment for ${finalBooking.service.name} on ${format(finalBooking.date, "PPP")} for ${finalBooking.patient.fullName} booked successfully! (Mock)`);
+    console.log("Final Booking Details (after payment):", finalBooking, "Payment Reference:", reference);
+    showSuccess(`Appointment for ${finalBooking.service.name} on ${format(finalBooking.date, "PPP")} for ${finalBooking.patient.fullName} booked successfully! Payment Reference: ${reference}`);
 
     // Reset form and go back to step 1
     setSelectedService(null);
@@ -66,9 +76,17 @@ const BookAppointment = () => {
     setStep(1);
   };
 
+  const handlePaymentClose = () => {
+    showError("Payment was not completed. You can try again or go back.");
+    // User can stay on step 4 or go back to step 3
+  };
+
   const handleBack = () => {
     setStep(prevStep => Math.max(1, prevStep - 1));
   };
+
+  const currentServicePrice = selectedService ? selectedService.price : 0;
+  const amountInKobo = Math.round(currentServicePrice * 100); // Paystack amount is in kobo
 
   return (
     <div className="p-4 sm:p-6 lg:p-8">
@@ -113,6 +131,24 @@ const BookAppointment = () => {
             onBack={handleBack}
             defaultValues={patientDetails || undefined}
           />
+        </div>
+      )}
+
+      {step === 4 && selectedService && selectedDate && patientDetails && (
+        <div className="mb-8">
+          <h2 className="text-2xl font-semibold mb-4">4. Make Payment</h2>
+          <PaystackPayment
+            amount={amountInKobo}
+            email={patientDetails.email}
+            fullName={patientDetails.fullName}
+            onSuccess={handlePaymentSuccess}
+            onClose={handlePaymentClose}
+          />
+          <div className="flex justify-start mt-6">
+            <Button variant="outline" onClick={handleBack}>
+              Back to Details
+            </Button>
+          </div>
         </div>
       )}
     </div>
