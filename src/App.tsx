@@ -9,8 +9,9 @@ import Clients from "./pages/Clients";
 import Calendar from "./pages/Calendar";
 import Settings from "./pages/Settings";
 import BookAppointment from "./pages/BookAppointment";
-import ClientDetails from "./pages/ClientDetails"; // Import the new ClientDetails page
+import ClientDetails from "./pages/ClientDetails";
 import NotFound from "./pages/NotFound";
+import { ClientProvider } from "./context/ClientContext"; // Import ClientProvider
 
 const queryClient = new QueryClient();
 
@@ -20,18 +21,20 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Layout>
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/clients" element={<Clients />} />
-            <Route path="/clients/:clientId" element={<ClientDetails />} /> {/* New dynamic route */}
-            <Route path="/calendar" element={<Calendar />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/book-appointment" element={<BookAppointment />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Layout>
+        <ClientProvider> {/* Wrap with ClientProvider */}
+          <Layout>
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/clients" element={<Clients />} />
+              <Route path="/clients/:clientId" element={<ClientDetails />} />
+              <Route path="/calendar" element={<Calendar />} />
+              <Route path="/settings" element={<Settings />} />
+              <Route path="/book-appointment" element={<BookAppointment />} />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Layout>
+        </ClientProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

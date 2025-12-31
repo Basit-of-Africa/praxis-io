@@ -1,35 +1,27 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
-
-// This is a placeholder for fetching client data.
-// In a real application, you would fetch this from a backend.
-const mockClients = [
-  {
-    id: "cl1",
-    fullName: "Alice Smith",
-    email: "alice.smith@example.com",
-    phone: "123-456-7890",
-    address: "101 Oak Ave",
-    notes: "Regular patient, prefers morning appointments.",
-  },
-  {
-    id: "cl2",
-    fullName: "Bob Johnson",
-    email: "bob.j@example.com",
-    phone: "098-765-4321",
-    address: "202 Pine St",
-    notes: "New patient, referred by Dr. Lee.",
-  },
-];
+import { ArrowLeft, Edit } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import ClientForm, { ClientFormValues } from "@/components/ClientForm";
+import { useClientContext } from "@/context/ClientContext"; // Import useClientContext
 
 const ClientDetails = () => {
   const { clientId } = useParams<{ clientId: string }>();
-  const client = mockClients.find((c) => c.id === clientId);
+  const { clients, updateClient } = useClientContext(); // Use clients and updateClient from context
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+
+  const client = clients.find((c) => c.id === clientId);
+
+  const handleEditClient = (data: ClientFormValues) => {
+    if (clientId) {
+      updateClient(clientId, data);
+      setIsEditDialogOpen(false);
+    }
+  };
 
   if (!client) {
     return (
@@ -47,14 +39,33 @@ const ClientDetails = () => {
 
   return (
     <div className="p-4 sm:p-6 lg:p-8">
-      <div className="flex items-center mb-6">
-        <Link to="/clients">
-          <Button variant="ghost" size="icon" className="mr-2">
-            <ArrowLeft className="h-5 w-5" />
-            <span className="sr-only">Back to Clients</span>
-          </Button>
-        </Link>
-        <h1 className="text-3xl font-bold">{client.fullName}</h1>
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center">
+          <Link to="/clients">
+            <Button variant="ghost" size="icon" className="mr-2">
+              <ArrowLeft className="h-5 w-5" />
+              <span className="sr-only">Back to Clients</span>
+            </Button>
+          </Link>
+          <h1 className="text-3xl font-bold">{client.fullName}</h1>
+        </div>
+        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+          <DialogTrigger asChild>
+            <Button variant="outline" size="sm">
+              <Edit className="mr-2 h-4 w-4" /> Edit Client
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Edit Client Details</DialogTitle>
+            </DialogHeader>
+            <ClientForm
+              onSubmit={handleEditClient}
+              onCancel={() => setIsEditDialogOpen(false)}
+              defaultValues={client}
+            />
+          </DialogContent>
+        </Dialog>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

@@ -13,43 +13,15 @@ import {
 } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import ClientForm, { ClientFormValues } from "@/components/ClientForm";
-import { showSuccess } from "@/utils/toast";
-import { Link } from "react-router-dom"; // Import Link
-
-interface Client extends ClientFormValues {
-  id: string;
-}
-
-const initialMockClients: Client[] = [
-  {
-    id: "cl1",
-    fullName: "Alice Smith",
-    email: "alice.smith@example.com",
-    phone: "123-456-7890",
-    address: "101 Oak Ave",
-    notes: "Regular patient, prefers morning appointments.",
-  },
-  {
-    id: "cl2",
-    fullName: "Bob Johnson",
-    email: "bob.j@example.com",
-    phone: "098-765-4321",
-    address: "202 Pine St",
-    notes: "New patient, referred by Dr. Lee.",
-  },
-];
+import { Link } from "react-router-dom";
+import { useClientContext } from "@/context/ClientContext"; // Import useClientContext
 
 const Clients = () => {
-  const [clients, setClients] = useState<Client[]>(initialMockClients);
+  const { clients, addClient } = useClientContext(); // Use clients and addClient from context
   const [isAddClientDialogOpen, setIsAddClientDialogOpen] = useState(false);
 
   const handleAddClient = (data: ClientFormValues) => {
-    const newClient: Client = {
-      id: `cl${clients.length + 1}`, // Simple ID generation
-      ...data,
-    };
-    setClients((prevClients) => [...prevClients, newClient]);
-    showSuccess(`Client ${newClient.fullName} added successfully!`);
+    addClient(data); // Use the addClient function from context
     setIsAddClientDialogOpen(false);
   };
 
