@@ -11,7 +11,8 @@ import Settings from "./pages/Settings";
 import BookAppointment from "./pages/BookAppointment";
 import ClientDetails from "./pages/ClientDetails";
 import NotFound from "./pages/NotFound";
-import { ClientProvider } from "./context/ClientContext"; // Import ClientProvider
+import { ClientProvider } from "./context/ClientContext";
+import { AppointmentProvider } from "./context/AppointmentContext"; // Import AppointmentProvider
 
 const queryClient = new QueryClient();
 
@@ -21,19 +22,21 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <ClientProvider> {/* Wrap with ClientProvider */}
-          <Layout>
-            <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/clients" element={<Clients />} />
-              <Route path="/clients/:clientId" element={<ClientDetails />} />
-              <Route path="/calendar" element={<Calendar />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/book-appointment" element={<BookAppointment />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Layout>
+        <ClientProvider>
+          <AppointmentProvider> {/* Wrap with AppointmentProvider */}
+            <Layout>
+              <Routes>
+                <Route path="/" element={<Dashboard />} />
+                <Route path="/clients" element={<Clients />} />
+                <Route path="/clients/:clientId" element={<ClientDetails />} />
+                <Route path="/calendar" element={<Calendar />} />
+                <Route path="/settings" element={<Settings />} />
+                <Route path="/book-appointment" element={<BookAppointment />} />
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Layout>
+          </AppointmentProvider>
         </ClientProvider>
       </BrowserRouter>
     </TooltipProvider>

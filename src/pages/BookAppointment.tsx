@@ -4,10 +4,11 @@ import React, { useState } from "react";
 import ServiceSelection from "@/components/ServiceSelection";
 import AppointmentDatePicker from "@/components/AppointmentDatePicker";
 import BookingForm from "@/components/BookingForm";
-import PaystackPayment from "@/components/PaystackPayment"; // Import the new PaystackPayment component
+import PaystackPayment from "@/components/PaystackPayment";
 import { Button } from "@/components/ui/button";
 import { showSuccess, showError } from "@/utils/toast";
 import { format } from "date-fns";
+import { useAppointmentContext } from "@/context/AppointmentContext"; // Import useAppointmentContext
 
 interface Service {
   id: string;
@@ -28,6 +29,7 @@ interface BookingDetails {
 }
 
 const BookAppointment = () => {
+  const { addAppointment } = useAppointmentContext(); // Use addAppointment from context
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [patientDetails, setPatientDetails] = useState<BookingDetails['patient'] | null>(null);
@@ -60,14 +62,14 @@ const BookAppointment = () => {
       return;
     }
 
-    const finalBooking: BookingDetails = {
+    const newAppointment = {
       service: selectedService,
       date: selectedDate,
       patient: patientDetails,
+      paymentReference: reference,
     };
 
-    console.log("Final Booking Details (after payment):", finalBooking, "Payment Reference:", reference);
-    showSuccess(`Appointment for ${finalBooking.service.name} on ${format(finalBooking.date, "PPP")} for ${finalBooking.patient.fullName} booked successfully! Payment Reference: ${reference}`);
+    addAppointment(newAppointment); // Add appointment to context
 
     // Reset form and go back to step 1
     setSelectedService(null);
