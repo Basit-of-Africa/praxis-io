@@ -14,12 +14,13 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import ClientForm, { ClientFormValues } from "@/components/ClientForm";
 import { showSuccess } from "@/utils/toast";
+import { Link } from "react-router-dom"; // Import Link
 
 interface Client extends ClientFormValues {
   id: string;
 }
 
-const mockClients: Client[] = [
+const initialMockClients: Client[] = [
   {
     id: "cl1",
     fullName: "Alice Smith",
@@ -39,7 +40,7 @@ const mockClients: Client[] = [
 ];
 
 const Clients = () => {
-  const [clients, setClients] = useState<Client[]>(mockClients);
+  const [clients, setClients] = useState<Client[]>(initialMockClients);
   const [isAddClientDialogOpen, setIsAddClientDialogOpen] = useState(false);
 
   const handleAddClient = (data: ClientFormValues) => {
@@ -91,7 +92,11 @@ const Clients = () => {
                 <TableBody>
                   {clients.map((client) => (
                     <TableRow key={client.id}>
-                      <TableCell className="font-medium">{client.fullName}</TableCell>
+                      <TableCell className="font-medium">
+                        <Link to={`/clients/${client.id}`} className="text-primary hover:underline">
+                          {client.fullName}
+                        </Link>
+                      </TableCell>
                       <TableCell>{client.email}</TableCell>
                       <TableCell>{client.phone}</TableCell>
                       <TableCell className="hidden md:table-cell">{client.address || "N/A"}</TableCell>
