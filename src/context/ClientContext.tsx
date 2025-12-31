@@ -24,6 +24,16 @@ const initialMockClients: Client[] = [
     email: "alice.smith@example.com",
     phone: "123-456-7890",
     address: "101 Oak Ave",
+    dateOfBirth: "1985-06-15",
+    gender: "female",
+    emergencyContact: {
+      name: "Bob Smith",
+      phone: "123-456-7891"
+    },
+    insurance: {
+      provider: "HealthPlus",
+      policyNumber: "HP123456"
+    },
     notes: "Regular patient, prefers morning appointments.",
   },
   {
@@ -32,6 +42,16 @@ const initialMockClients: Client[] = [
     email: "bob.j@example.com",
     phone: "098-765-4321",
     address: "202 Pine St",
+    dateOfBirth: "1990-03-22",
+    gender: "male",
+    emergencyContact: {
+      name: "Carol Johnson",
+      phone: "098-765-4322"
+    },
+    insurance: {
+      provider: "MediCare",
+      policyNumber: "MC789012"
+    },
     notes: "New patient, referred by Dr. Lee.",
   },
 ];

@@ -8,7 +8,7 @@ import PaystackPayment from "@/components/PaystackPayment";
 import { Button } from "@/components/ui/button";
 import { showSuccess, showError } from "@/utils/toast";
 import { format } from "date-fns";
-import { useAppointmentContext } from "@/context/AppointmentContext"; // Import useAppointmentContext
+import { useAppointmentContext } from "@/context/AppointmentContext";
 
 interface Service {
   id: string;
@@ -25,11 +25,14 @@ interface BookingDetails {
     email: string;
     phone: string;
     notes?: string;
+    isRecurring?: boolean;
+    recurrenceFrequency?: "daily" | "weekly" | "monthly";
+    recurrenceEndDate?: Date;
   };
 }
 
 const BookAppointment = () => {
-  const { addAppointment } = useAppointmentContext(); // Use addAppointment from context
+  const { addAppointment } = useAppointmentContext();
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [patientDetails, setPatientDetails] = useState<BookingDetails['patient'] | null>(null);
@@ -67,9 +70,14 @@ const BookAppointment = () => {
       date: selectedDate,
       patient: patientDetails,
       paymentReference: reference,
+      isRecurring: patientDetails.isRecurring,
+      recurrencePattern: patientDetails.isRecurring ? {
+        frequency: patientDetails.recurrenceFrequency || "weekly",
+        endDate: patientDetails.recurrenceEndDate
+      } : undefined
     };
 
-    addAppointment(newAppointment); // Add appointment to context
+    addAppointment(newAppointment);
 
     // Reset form and go back to step 1
     setSelectedService(null);
@@ -93,26 +101,26 @@ const BookAppointment = () => {
   return (
     <div className="p-4 sm:p-6 lg:p-8">
       <h1 className="text-3xl font-bold mb-6">Book New Appointment</h1>
-
+      
       {step === 1 && (
         <div className="mb-8">
           <h2 className="text-2xl font-semibold mb-4">1. Select a Service</h2>
-          <ServiceSelection
-            selectedService={selectedService}
-            onServiceSelect={handleServiceSelect}
+          <ServiceSelection 
+            selectedService={selectedService} 
+            onServiceSelect={handleServiceSelect} 
           />
           {!selectedService && (
             <p className="text-muted-foreground mt-4">Please select a service to proceed.</p>
           )}
         </div>
       )}
-
+      
       {step === 2 && (
         <div className="mb-8">
           <h2 className="text-2xl font-semibold mb-4">2. Select a Date</h2>
-          <AppointmentDatePicker
-            selectedDate={selectedDate}
-            onDateSelect={handleDateSelect}
+          <AppointmentDatePicker 
+            selectedDate={selectedDate} 
+            onDateSelect={handleDateSelect} 
           />
           {!selectedDate && (
             <p className="text-muted-foreground mt-4">Please select a date to proceed.</p>
@@ -124,23 +132,23 @@ const BookAppointment = () => {
           </div>
         </div>
       )}
-
+      
       {step === 3 && (
         <div className="mb-8">
           <h2 className="text-2xl font-semibold mb-4">3. Enter Your Details</h2>
-          <BookingForm
-            onSubmit={handleBookingFormSubmit}
+          <BookingForm 
+            onSubmit={handleBookingFormSubmit} 
             onBack={handleBack}
             defaultValues={patientDetails || undefined}
           />
         </div>
       )}
-
+      
       {step === 4 && selectedService && selectedDate && patientDetails && (
         <div className="mb-8">
           <h2 className="text-2xl font-semibold mb-4">4. Make Payment</h2>
           {import.meta.env.VITE_PAYSTACK_PUBLIC_KEY ? (
-            <PaystackPayment
+            <PaystackPayment 
               amount={amountInKobo}
               email={patientDetails.email}
               fullName={patientDetails.fullName}

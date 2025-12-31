@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Edit, Trash2, Phone, Mail, MapPin, Calendar } from "lucide-react";
+import { ArrowLeft, Edit, Trash2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -13,6 +13,7 @@ import ClientForm, { ClientFormValues } from "@/components/ClientForm";
 import { useClientContext } from "@/context/ClientContext";
 import { useAppointmentContext } from "@/context/AppointmentContext";
 import { format } from "date-fns";
+import ClientDetailsCard from "@/components/ClientDetailsCard";
 
 const ClientDetails = () => {
   const { clientId } = useParams<{ clientId: string }>();
@@ -119,35 +120,10 @@ const ClientDetails = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-        <Card className="md:col-span-2">
-          <CardHeader>
-            <CardTitle>Contact Information</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-start">
-              <Mail className="h-5 w-5 text-muted-foreground mr-3 mt-0.5" />
-              <div>
-                <p className="text-sm text-muted-foreground">Email</p>
-                <p className="font-medium">{client.email}</p>
-              </div>
-            </div>
-            <div className="flex items-start">
-              <Phone className="h-5 w-5 text-muted-foreground mr-3 mt-0.5" />
-              <div>
-                <p className="text-sm text-muted-foreground">Phone</p>
-                <p className="font-medium">{client.phone}</p>
-              </div>
-            </div>
-            <div className="flex items-start">
-              <MapPin className="h-5 w-5 text-muted-foreground mr-3 mt-0.5" />
-              <div>
-                <p className="text-sm text-muted-foreground">Address</p>
-                <p className="font-medium">{client.address || "N/A"}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        <div className="lg:col-span-2">
+          <ClientDetailsCard client={client} />
+        </div>
         
         <Card>
           <CardHeader>
@@ -178,17 +154,6 @@ const ClientDetails = () => {
           </CardContent>
         </Card>
       </div>
-
-      <Card>
-        <CardHeader>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 p-0">
-            <CardTitle>Notes</CardTitle>
-          </CardHeader>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground">{client.notes || "No additional notes."}</p>
-        </CardContent>
-      </Card>
 
       <Card className="mt-6">
         <CardHeader>

@@ -23,6 +23,11 @@ interface Appointment {
   paymentReference?: string;
   status: "booked" | "completed" | "cancelled";
   notes?: string;
+  isRecurring?: boolean;
+  recurrencePattern?: {
+    frequency: "daily" | "weekly" | "monthly";
+    endDate?: Date;
+  };
 }
 
 interface AppointmentContextType {
@@ -30,6 +35,7 @@ interface AppointmentContextType {
   addAppointment: (appointmentData: Omit<Appointment, "id" | "status">) => void;
   updateAppointmentStatus: (appointmentId: string, status: Appointment["status"]) => void;
   updateAppointment: (appointmentId: string, appointmentData: Partial<Appointment>) => void;
+  deleteAppointment: (appointmentId: string) => void;
 }
 
 const AppointmentContext = createContext<AppointmentContextType | undefined>(undefined);
@@ -78,8 +84,43 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
       status: "booked",
       ...appointmentData,
     };
-    setAppointments((prevAppointments) => [...prevAppointments, newAppointment]);
-    showSuccess(`Appointment for ${newAppointment.patient.fullName} booked successfully!`);
+    
+    // If it's a recurring appointment, generate multiple appointments
+    if (appointmentData.isRecurring && appointmentData.recurrencePattern) {
+      const recurringAppointments: Appointment[] = [];
+      const { frequency, endDate } = appointmentData.recurrencePattern;
+      let currentDate = new Date(appointmentData.date);
+      
+      // Generate appointments for the next 3 occurrences or until end date
+      for (let i = 0; i < 3; i++) {
+        if (endDate && currentDate > endDate) break;
+        
+        recurringAppointments.push({
+          ...newAppointment,
+          id: `app${Date.now() + i}`,
+          date: new Date(currentDate)
+        });
+        
+        // Calculate next date based on frequency
+        switch (frequency) {
+          case "daily":
+            currentDate.setDate(currentDate.getDate() + 1);
+            break;
+          case "weekly":
+            currentDate.setDate(currentDate.getDate() + 7);
+            break;
+          case "monthly":
+            currentDate.setMonth(currentDate.getMonth() + 1);
+            break;
+        }
+      }
+      
+      setAppointments((prevAppointments) => [...prevAppointments, ...recurringAppointments]);
+      showSuccess(`Recurring appointment for ${newAppointment.patient.fullName} created successfully!`);
+    } else {
+      setAppointments((prevAppointments) => [...prevAppointments, newAppointment]);
+      showSuccess(`Appointment for ${newAppointment.patient.fullName} booked successfully!`);
+    }
   };
 
   const updateAppointmentStatus = (appointmentId: string, status: Appointment["status"]) => {
@@ -100,8 +141,21 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
     showSuccess(`Appointment updated successfully!`);
   };
 
+  const deleteAppointment = (appointmentId: string) => {
+    setAppointments((prevAppointments) =>
+      prevAppointments.filter((app) => app.id !== appointmentId)
+    );
+    showSuccess(`Appointment deleted successfully!`);
+  };
+
   return (
-    <AppointmentContext.Provider value={{ appointments, addAppointment, updateAppointmentStatus, updateAppointment }}>
+    <AppointmentContext.Provider value={{ 
+      appointments, 
+      addAppointment, 
+      updateAppointmentStatus, 
+      updateAppointment,
+      deleteAppointment
+    }}>
       {children}
     </AppointmentContext.Provider>
   );
