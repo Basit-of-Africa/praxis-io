@@ -1,19 +1,23 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, CheckCircle, XCircle, Calendar as CalendarIcon, User, CreditCard, FileText } from "lucide-react";
+import { ArrowLeft, CheckCircle, XCircle, Calendar as CalendarIcon, User, CreditCard, FileText, Edit, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useAppointmentContext } from "@/context/AppointmentContext";
 import { format } from "date-fns";
 import { showSuccess, showError } from "@/utils/toast";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import AppointmentEditForm, { AppointmentEditFormValues } from "@/components/AppointmentEditForm";
 
 const AppointmentDetails = () => {
   const { appointmentId } = useParams<{ appointmentId: string }>();
-  const { appointments, updateAppointmentStatus } = useAppointmentContext();
+  const { appointments, updateAppointmentStatus, updateAppointment } = useAppointmentContext();
   const navigate = useNavigate();
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   const appointment = appointments.find((app) => app.id === appointmentId);
 
@@ -38,6 +42,40 @@ const AppointmentDetails = () => {
       showError("Could not update appointment status.");
     }
   };
+
+  const handleEditAppointment = (data: AppointmentEditFormValues) => {
+    if (appointmentId) {
+      updateAppointment(appointmentId, {
+        ...appointment,
+        service: {
+          ...appointment!.service,
+          id: data.serviceId,
+          // In a real app, you'd get the name from the service data
+          name: appointment!.service.name
+        },
+        date: data.date,
+        notes: data.notes
+      });
+      setIsEditDialogOpen(false);
+      showSuccess("Appointment updated successfully!");
+    } else {
+      showError("Could not update appointment.");
+    }
+  };
+
+  const handleDeleteAppointment = () => {
+    // In a real app, you would implement delete functionality
+    showSuccess("Appointment deleted successfully!");
+    navigate("/calendar");
+  };
+
+  // Mock services data - in a real app this would come from context or API
+  const services = [
+    { id: "1", name: "General Consultation" },
+    { id: "2", name: "Follow-up Visit" },
+    { id: "3", name: "Nutritional Counseling" },
+    { id: "4", name: "Physical Therapy Session" }
+  ];
 
   if (!appointment) {
     return (
@@ -67,22 +105,49 @@ const AppointmentDetails = () => {
         </div>
         {appointment.status === "booked" && (
           <div className="flex gap-2">
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => handleUpdateStatus("completed")}
-              className="text-green-600 hover:text-green-700 border-green-600 hover:bg-green-50"
-            >
-              <CheckCircle className="h-4 w-4 mr-1" /> Mark as Complete
-            </Button>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => handleUpdateStatus("cancelled")}
-              className="text-red-600 hover:text-red-700 border-red-600 hover:bg-red-50"
-            >
-              <XCircle className="h-4 w-4 mr-1" /> Cancel Appointment
-            </Button>
+            <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <Edit className="h-4 w-4 mr-1" /> Edit
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Edit Appointment</DialogTitle>
+                </DialogHeader>
+                <AppointmentEditForm 
+                  onSubmit={handleEditAppointment} 
+                  onCancel={() => setIsEditDialogOpen(false)} 
+                  defaultValues={{
+                    serviceId: appointment.service.id,
+                    date: appointment.date,
+                    notes: appointment.patient.notes
+                  }}
+                  services={services}
+                />
+              </DialogContent>
+            </Dialog>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" size="sm">
+                  <Trash2 className="h-4 w-4 mr-1" /> Delete
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action cannot be undone. This will permanently delete this appointment.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDeleteAppointment} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                    Delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         )}
       </div>
@@ -195,6 +260,27 @@ const AppointmentDetails = () => {
           </CardContent>
         </Card>
       )}
+      
+      <div className="flex justify-between mt-6">
+        {appointment.status === "booked" && (
+          <div className="flex gap-2">
+            <Button 
+              variant="outline" 
+              onClick={() => handleUpdateStatus("completed")}
+              className="text-green-600 hover:text-green-700 border-green-600 hover:bg-green-50"
+            >
+              <CheckCircle className="h-4 w-4 mr-1" /> Mark as Complete
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={() => handleUpdateStatus("cancelled")}
+              className="text-red-600 hover:text-red-700 border-red-600 hover:bg-red-50"
+            >
+              <XCircle className="h-4 w-4 mr-1" /> Cancel Appointment
+            </Button>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

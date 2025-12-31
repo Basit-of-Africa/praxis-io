@@ -10,7 +10,7 @@ import Calendar from "./pages/Calendar";
 import Settings from "./pages/Settings";
 import BookAppointment from "./pages/BookAppointment";
 import ClientDetails from "./pages/ClientDetails";
-import AppointmentDetails from "./pages/AppointmentDetails"; // Import AppointmentDetails
+import AppointmentDetails from "./pages/AppointmentDetails";
 import NotFound from "./pages/NotFound";
 import { ClientProvider } from "./context/ClientContext";
 import { AppointmentProvider } from "./context/AppointmentContext";
@@ -33,7 +33,7 @@ const App = () => (
                 <Route path="/calendar" element={<Calendar />} />
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/book-appointment" element={<BookAppointment />} />
-                <Route path="/appointments/:appointmentId" element={<AppointmentDetails />} /> {/* New route */}
+                <Route path="/appointments/:appointmentId" element={<AppointmentDetails />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

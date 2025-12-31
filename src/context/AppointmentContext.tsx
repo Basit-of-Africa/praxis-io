@@ -22,12 +22,14 @@ interface Appointment {
   };
   paymentReference?: string;
   status: "booked" | "completed" | "cancelled";
+  notes?: string;
 }
 
 interface AppointmentContextType {
   appointments: Appointment[];
   addAppointment: (appointmentData: Omit<Appointment, "id" | "status">) => void;
   updateAppointmentStatus: (appointmentId: string, status: Appointment["status"]) => void;
+  updateAppointment: (appointmentId: string, appointmentData: Partial<Appointment>) => void;
 }
 
 const AppointmentContext = createContext<AppointmentContextType | undefined>(undefined);
@@ -35,16 +37,34 @@ const AppointmentContext = createContext<AppointmentContextType | undefined>(und
 const initialMockAppointments: Appointment[] = [
   {
     id: "app1",
-    service: { id: "1", name: "General Consultation", description: "A standard consultation", price: 50.00 },
+    service: {
+      id: "1",
+      name: "General Consultation",
+      description: "A standard consultation",
+      price: 50.00
+    },
     date: new Date(new Date().setDate(new Date().getDate() + 2)), // 2 days from now
-    patient: { fullName: "Alice Smith", email: "alice.smith@example.com", phone: "123-456-7890" },
+    patient: {
+      fullName: "Alice Smith",
+      email: "alice.smith@example.com",
+      phone: "123-456-7890"
+    },
     status: "booked",
   },
   {
     id: "app2",
-    service: { id: "2", name: "Follow-up Visit", description: "A follow-up appointment", price: 30.00 },
+    service: {
+      id: "2",
+      name: "Follow-up Visit",
+      description: "A follow-up appointment",
+      price: 30.00
+    },
     date: new Date(new Date().setDate(new Date().getDate() - 1)), // 1 day ago
-    patient: { fullName: "Bob Johnson", email: "bob.j@example.com", phone: "098-765-4321" },
+    patient: {
+      fullName: "Bob Johnson",
+      email: "bob.j@example.com",
+      phone: "098-765-4321"
+    },
     status: "completed",
   },
 ];
@@ -71,8 +91,17 @@ export const AppointmentProvider: React.FC<{ children: ReactNode }> = ({ childre
     showSuccess(`Appointment status updated to ${status}!`);
   };
 
+  const updateAppointment = (appointmentId: string, appointmentData: Partial<Appointment>) => {
+    setAppointments((prevAppointments) =>
+      prevAppointments.map((app) =>
+        app.id === appointmentId ? { ...app, ...appointmentData } : app
+      )
+    );
+    showSuccess(`Appointment updated successfully!`);
+  };
+
   return (
-    <AppointmentContext.Provider value={{ appointments, addAppointment, updateAppointmentStatus }}>
+    <AppointmentContext.Provider value={{ appointments, addAppointment, updateAppointmentStatus, updateAppointment }}>
       {children}
     </AppointmentContext.Provider>
   );
