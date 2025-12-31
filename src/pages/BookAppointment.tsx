@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import ServiceSelection from "@/components/ServiceSelection";
 import AppointmentDatePicker from "@/components/AppointmentDatePicker";
+import BookingForm from "@/components/BookingForm"; // Import the new BookingForm
 import { Button } from "@/components/ui/button";
 import { showSuccess, showError } from "@/utils/toast";
 import { format } from "date-fns";
@@ -14,58 +15,106 @@ interface Service {
   price: number;
 }
 
+interface BookingDetails {
+  service: Service;
+  date: Date;
+  patient: {
+    fullName: string;
+    email: string;
+    phone: string;
+    notes?: string;
+  };
+}
+
 const BookAppointment = () => {
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [patientDetails, setPatientDetails] = useState<BookingDetails['patient'] | null>(null);
+  const [step, setStep] = useState(1); // 1: Service, 2: Date, 3: Form
 
-  const handleBookAppointment = () => {
-    if (!selectedService) {
-      showError("Please select a service.");
+  const handleServiceSelect = (service: Service | null) => {
+    setSelectedService(service);
+    if (service) setStep(2); // Move to date selection
+  };
+
+  const handleDateSelect = (date: Date | undefined) => {
+    setSelectedDate(date);
+    if (date) setStep(3); // Move to booking form
+  };
+
+  const handleBookingFormSubmit = (data: BookingDetails['patient']) => {
+    setPatientDetails(data);
+    if (!selectedService || !selectedDate) {
+      showError("An unexpected error occurred. Please restart the booking process.");
+      setStep(1); // Reset to start
       return;
     }
-    if (!selectedDate) {
-      showError("Please select a date.");
-      return;
-    }
 
-    // In a real application, you would send this data to a backend
-    console.log("Booking details:", {
+    const finalBooking: BookingDetails = {
       service: selectedService,
-      date: selectedDate.toISOString().split('T')[0], // Format date for display/API
-    });
-    showSuccess(`Appointment for ${selectedService.name} on ${format(selectedDate, "PPP")} booked successfully! (Mock)`);
-    // Reset form
+      date: selectedDate,
+      patient: data,
+    };
+
+    console.log("Final Booking Details:", finalBooking);
+    showSuccess(`Appointment for ${finalBooking.service.name} on ${format(finalBooking.date, "PPP")} for ${finalBooking.patient.fullName} booked successfully! (Mock)`);
+
+    // Reset form and go back to step 1
     setSelectedService(null);
     setSelectedDate(undefined);
+    setPatientDetails(null);
+    setStep(1);
+  };
+
+  const handleBack = () => {
+    setStep(prevStep => Math.max(1, prevStep - 1));
   };
 
   return (
     <div className="p-4 sm:p-6 lg:p-8">
       <h1 className="text-3xl font-bold mb-6">Book New Appointment</h1>
 
-      <div className="mb-8">
-        <h2 className="text-2xl font-semibold mb-4">1. Select a Service</h2>
-        <ServiceSelection
-          selectedService={selectedService}
-          onServiceSelect={setSelectedService}
-        />
-      </div>
+      {step === 1 && (
+        <div className="mb-8">
+          <h2 className="text-2xl font-semibold mb-4">1. Select a Service</h2>
+          <ServiceSelection
+            selectedService={selectedService}
+            onServiceSelect={handleServiceSelect}
+          />
+          {!selectedService && (
+            <p className="text-muted-foreground mt-4">Please select a service to proceed.</p>
+          )}
+        </div>
+      )}
 
-      <div className="mb-8">
-        <h2 className="text-2xl font-semibold mb-4">2. Select a Date</h2>
-        <AppointmentDatePicker
-          selectedDate={selectedDate}
-          onDateSelect={setSelectedDate}
-        />
-      </div>
+      {step === 2 && (
+        <div className="mb-8">
+          <h2 className="text-2xl font-semibold mb-4">2. Select a Date</h2>
+          <AppointmentDatePicker
+            selectedDate={selectedDate}
+            onDateSelect={handleDateSelect}
+          />
+          {!selectedDate && (
+            <p className="text-muted-foreground mt-4">Please select a date to proceed.</p>
+          )}
+          <div className="flex justify-start mt-6">
+            <Button variant="outline" onClick={handleBack}>
+              Back to Services
+            </Button>
+          </div>
+        </div>
+      )}
 
-      <Button
-        onClick={handleBookAppointment}
-        className="w-full md:w-auto"
-        disabled={!selectedService || !selectedDate}
-      >
-        Proceed to Booking Form
-      </Button>
+      {step === 3 && (
+        <div className="mb-8">
+          <h2 className="text-2xl font-semibold mb-4">3. Enter Your Details</h2>
+          <BookingForm
+            onSubmit={handleBookingFormSubmit}
+            onBack={handleBack}
+            defaultValues={patientDetails || undefined}
+          />
+        </div>
+      )}
     </div>
   );
 };
