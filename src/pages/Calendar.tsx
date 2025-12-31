@@ -16,10 +16,12 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar as ShadcnCalendar } from "@/components/ui/calendar"; // Renamed to avoid conflict
 import { Button } from "@/components/ui/button";
 import { CheckCircle, XCircle } from "lucide-react";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 
 const Calendar = () => {
   const { appointments, updateAppointmentStatus } = useAppointmentContext();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+  const navigate = useNavigate(); // Initialize useNavigate
 
   const appointmentsForSelectedDate = selectedDate
     ? appointments.filter((app) => isSameDay(app.date, selectedDate))
@@ -44,6 +46,10 @@ const Calendar = () => {
 
   const handleUpdateStatus = (appointmentId: string, status: "completed" | "cancelled") => {
     updateAppointmentStatus(appointmentId, status);
+  };
+
+  const handleRowClick = (appointmentId: string) => {
+    navigate(`/appointments/${appointmentId}`);
   };
 
   return (
@@ -88,7 +94,7 @@ const Calendar = () => {
                   </TableHeader>
                   <TableBody>
                     {sortedAppointmentsForSelectedDate.map((app) => (
-                      <TableRow key={app.id}>
+                      <TableRow key={app.id} onClick={() => handleRowClick(app.id)} className="cursor-pointer hover:bg-muted/50">
                         <TableCell className="font-medium">{format(app.date, "p")}</TableCell>
                         <TableCell>{app.patient.fullName}</TableCell>
                         <TableCell>{app.service.name}</TableCell>
@@ -97,7 +103,7 @@ const Calendar = () => {
                         </TableCell>
                         <TableCell className="text-right">
                           {app.status === "booked" && (
-                            <div className="flex justify-end gap-2">
+                            <div className="flex justify-end gap-2" onClick={(e) => e.stopPropagation()}> {/* Prevent row click when clicking buttons */}
                               <Button
                                 variant="outline"
                                 size="sm"

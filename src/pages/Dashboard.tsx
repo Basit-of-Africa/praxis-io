@@ -4,11 +4,11 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useAppointmentContext } from "@/context/AppointmentContext"; // Import useAppointmentContext
+import { useAppointmentContext } from "@/context/AppointmentContext";
 import { format, isFuture } from "date-fns";
 
 const Dashboard = () => {
-  const { appointments } = useAppointmentContext(); // Use appointments from context
+  const { appointments } = useAppointmentContext();
 
   const upcomingAppointments = appointments
     .filter(app => isFuture(app.date) && app.status === "booked")
@@ -31,10 +31,12 @@ const Dashboard = () => {
               <p className="text-muted-foreground">No upcoming appointments.</p>
             ) : (
               <ul className="space-y-3">
-                {upcomingAppointments.slice(0, 3).map((app) => ( // Show up to 3 upcoming appointments
+                {upcomingAppointments.slice(0, 3).map((app) => (
                   <li key={app.id} className="border-b pb-2 last:border-b-0 last:pb-0">
-                    <p className="font-medium">{app.patient.fullName} - {app.service.name}</p>
-                    <p className="text-sm text-muted-foreground">{format(app.date, "PPP 'at' p")}</p>
+                    <Link to={`/appointments/${app.id}`} className="block hover:bg-muted/50 -mx-3 px-3 py-2 rounded-md transition-colors">
+                      <p className="font-medium">{app.patient.fullName} - {app.service.name}</p>
+                      <p className="text-sm text-muted-foreground">{format(app.date, "PPP 'at' p")}</p>
+                    </Link>
                   </li>
                 ))}
                 {upcomingAppointments.length > 3 && (

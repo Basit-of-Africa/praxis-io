@@ -10,9 +10,10 @@ import Calendar from "./pages/Calendar";
 import Settings from "./pages/Settings";
 import BookAppointment from "./pages/BookAppointment";
 import ClientDetails from "./pages/ClientDetails";
+import AppointmentDetails from "./pages/AppointmentDetails"; // Import AppointmentDetails
 import NotFound from "./pages/NotFound";
 import { ClientProvider } from "./context/ClientContext";
-import { AppointmentProvider } from "./context/AppointmentContext"; // Import AppointmentProvider
+import { AppointmentProvider } from "./context/AppointmentContext";
 
 const queryClient = new QueryClient();
 
@@ -23,7 +24,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <ClientProvider>
-          <AppointmentProvider> {/* Wrap with AppointmentProvider */}
+          <AppointmentProvider>
             <Layout>
               <Routes>
                 <Route path="/" element={<Dashboard />} />
@@ -32,6 +33,7 @@ const App = () => (
                 <Route path="/calendar" element={<Calendar />} />
                 <Route path="/settings" element={<Settings />} />
                 <Route path="/book-appointment" element={<BookAppointment />} />
+                <Route path="/appointments/:appointmentId" element={<AppointmentDetails />} /> {/* New route */}
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

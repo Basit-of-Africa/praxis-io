@@ -28,13 +28,13 @@ import {
 import { Badge } from "@/components/ui/badge";
 import ClientForm, { ClientFormValues } from "@/components/ClientForm";
 import { useClientContext } from "@/context/ClientContext";
-import { useAppointmentContext } from "@/context/AppointmentContext"; // Import useAppointmentContext
+import { useAppointmentContext } from "@/context/AppointmentContext";
 import { format } from "date-fns";
 
 const ClientDetails = () => {
   const { clientId } = useParams<{ clientId: string }>();
   const { clients, updateClient, deleteClient } = useClientContext();
-  const { appointments } = useAppointmentContext(); // Get appointments from context
+  const { appointments } = useAppointmentContext();
   const navigate = useNavigate();
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
@@ -54,6 +54,7 @@ const ClientDetails = () => {
     }
   };
 
+  // Filter appointments by client email, as client ID is not directly stored on appointment patient object
   const clientAppointments = appointments.filter(
     (app) => app.patient.email === client?.email
   ).sort((a, b) => b.date.getTime() - a.date.getTime()); // Sort by most recent first
@@ -183,7 +184,7 @@ const ClientDetails = () => {
                 </TableHeader>
                 <TableBody>
                   {clientAppointments.map((app) => (
-                    <TableRow key={app.id}>
+                    <TableRow key={app.id} className="cursor-pointer hover:bg-muted/50" onClick={() => navigate(`/appointments/${app.id}`)}>
                       <TableCell className="font-medium">{format(app.date, "PPP 'at' p")}</TableCell>
                       <TableCell>{app.service.name}</TableCell>
                       <TableCell>
